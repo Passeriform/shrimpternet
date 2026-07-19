@@ -15,17 +15,7 @@
 
 #define DIE(msg) do { perror("[FATAL] " msg); exit(EXIT_FAILURE); } while(0)
 
-static void handle_client(int client_fd, const char *base_dir) {
-    char buf[2048] = {0};
-    char method[16], path[1024];
-
-    if (read(client_fd, buf, sizeof(buf) - 1) <= 0) return;
-
-    if (sscanf(buf, "%15s %1023s", method, path) != 2 || strcmp(method, "GET") != 0) {
-        dprintf(client_fd, "HTTP/1.1 400 Bad Request\r\n\r\n");
-        return;
-    }
-
+static void serve_file(int client_fd, const char *base_dir, char *path) {
     char target[PATH_MAX];
     if (resolve_safe_path(base_dir, path, target) < 0) {
         dprintf(client_fd, "HTTP/1.1 404 Not Found\r\n\r\n");
@@ -49,20 +39,47 @@ static void handle_client(int client_fd, const char *base_dir) {
 
     off_t offset = 0;
     sendfile(client_fd, file_fd, &offset, st.st_size);
-
     close(file_fd);
 }
 
+static void handle_client(int client_fd, const char *base_dir, const char *web_dir) {
+    char buf[2048] = {0};
+    char method[16], path[1024];
+
+    if (read(client_fd, buf, sizeof(buf) - 1) <= 0) return;
+
+    if (sscanf(buf, "%15s %1023s", method, path) != 2) {
+        dprintf(client_fd, "HTTP/1.1 400 Bad Request\r\n\r\n");
+        return;
+    }
+
+    if (strcmp(path, "/meta") == 0) {
+        serve_file(client_fd, base_dir, "/meta.json");
+    } else if (strncmp(path, "/blogs", 6) == 0) {
+        if(strcmp(method, "GET") != 0) {
+            dprintf(client_fd, "HTTP/1.1 400 Bad Request\r\n\r\n");
+            return;
+        }
+
+        serve_file(client_fd, base_dir, path);
+    } else {
+        serve_file(client_fd, web_dir, path);
+    }
+}
+
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <directory-path> [port]\n", argv[0]);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <directory-path> <web-assets-path> [port]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     char base_dir[PATH_MAX];
     if (!realpath(argv[1], base_dir)) DIE("Target routing directory invalid");
 
-    int port = (argc >= 3) ? atoi(argv[2]) : 8080;
+    char web_dir[PATH_MAX];
+    if (!realpath(argv[2], web_dir)) DIE("Landing web assets directory invalid");
+
+    int port = (argc >= 4) ? atoi(argv[3]) : 8080;
 
     signal(SIGCHLD, SIG_IGN);
 
@@ -88,7 +105,7 @@ int main(int argc, char *argv[]) {
 
         if (fork() == 0) {
             close(server_fd);
-            handle_client(client_fd, base_dir);
+            handle_client(client_fd, base_dir, web_dir);
             close(client_fd);
             return EXIT_SUCCESS;
         }

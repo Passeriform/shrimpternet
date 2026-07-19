@@ -20,9 +20,11 @@
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
 
+      configDir = "\${XDG_CONFIG_HOME:-$HOME/.config}/shrimpternet";
       cacheDir = "\${XDG_CACHE_HOME:-$HOME/.cache}/shrimpternet";
-      collectionDir = "${cacheDir}/collection";
-      blogListFile = "${cacheDir}/blog.txt";
+      blogsDir = "${cacheDir}/blogs";
+      blogsSourceFile = "${configDir}/blogs.txt";
+      metaFile = "${cacheDir}/meta.json";
 
       helpText = ''
         ========= Shrimpternet =========
@@ -32,24 +34,39 @@
         ================================
       '';
 
-      runBinary = pkgs.runCommandCC "shrimp-run-bin" {} ''
-        mkdir -p $out/bin
-        cd "${./server}"
-        $CC *.c -O2 -o $out/bin/shrimp-run
-      '';
+      webAssets = pkgs.stdenv.mkDerivation {
+        name = "shrimp-web-assets";
+        src = builtins.path {
+          path = ./web;
+          name = "shrimp-web-source";
+        };
+        dontBuild = true;
+        installPhase = ''
+          mkdir -p $out
+          cp -r ./* $out/
+        '';
+      };
+
+      runBinary =
+        pkgs.runCommandCC "shrimp-run-bin" {
+          src = ./server;
+        } ''
+          mkdir -p $out/bin
+          cd "${./server}"
+          $CC $src/*.c -O2 -o $out/bin/shrimp-run
+        '';
 
       runCommand = pkgs.writeShellApplication {
         name = "shrimp-run";
         runtimeInputs = [runBinary];
-        text = ''shrimp-run "${collectionDir}"'';
+        text = ''shrimp-run "${cacheDir}" "${webAssets}"'';
       };
 
       updateCommand = pkgs.writeShellApplication {
         name = "shrimp-update";
-        runtimeInputs = [pkgs.httrack];
         text = ''
-          httrack -%L "${blogListFile}" \
-            -O "${collectionDir}" \
+          ${pkgs.httrack}/bin/httrack -%L "${blogsSourceFile}" \
+            -O "${blogsDir}" \
             -%u0 -N0 -C1 -v \
             --max-rate=10000000 \
             --sockets=8 \
@@ -62,14 +79,40 @@
           name = "shrimp";
           runtimeInputs = [runCommand updateCommand];
           text = ''
+            mkdir -p "${configDir}"
             mkdir -p "${cacheDir}"
-            mkdir -p "${collectionDir}"
+            mkdir -p "${blogsDir}"
 
-            if [ ! -f "${blogListFile}" ]; then
-              cat << EOF > "${blogListFile}"
-              ${builtins.concatStringsSep "\n" blogs}
-            EOF
+            if [ ! -f "${blogsSourceFile}" ]; then
+              echo "${builtins.concatStringsSep "\n" blogs}" > "${blogsSourceFile}"
             fi
+
+            if [ ! -f "${metaFile}" ]; then
+              echo "{}" > "${metaFile}"
+            fi
+
+            # shellcheck disable=SC2016
+            find "${blogsDir}" -mindepth 2 -maxdepth 2 -name index.html | while read -r file; do
+              slug=$(basename "$(dirname "$file")")
+              href=blogs/"$slug"/
+
+              sed -E '/<base [^>]*>/d; s|(<head>)|\1\n    '"<base href=\"/$href\">"'|i' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+
+              title=$(${pkgs.pup}/bin/pup 'title text{}' < "$file" 2>/dev/null)
+              description=$(${pkgs.pup}/bin/pup 'meta[name="description"] attr{content}' < "$file" 2>/dev/null)
+              image=blogs/$(${pkgs.pup}/bin/pup 'head link[rel~="icon"], head link[rel~="shortcut icon"] attr{href}' < "$file" 2>/dev/null)
+
+              ${pkgs.jq}/bin/jq -n \
+                --arg slug "$slug" \
+                --arg title "$title" \
+                --arg description "$description" \
+                --arg image "$image" \
+                --arg href "$href" \
+                '{slug: $slug, title: $title, description: $description, image: $image, href: $href}'
+            done | ${pkgs.jq}/bin/jq --null-input --rawfile orig "${metaFile}" '
+              ($orig | fromjson | .blogs // []) + [inputs]
+              | { blogs: (INDEX(.[]; .slug) | [ .[] ]) }
+            ' > "${metaFile}.tmp" && mv "${metaFile}.tmp" "${metaFile}"
 
             if [ $# -lt 1 ]; then
               exec "${updateCommand}/bin/shrimp-update" && "${runCommand}/bin/shrimp-run"

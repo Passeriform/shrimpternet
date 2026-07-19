@@ -1,0 +1,69 @@
+:root {
+    --bg: #0b0d10;
+    --surface: #12151a;
+    --text: #edf2f7;
+    --muted: #9aa4b2;
+    --accent: #7df9ff;
+    --content-width: 1440px;
+    --page-padding: 48px;
+    --section-gap: 96px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Iosevka Web", system-ui, sans-serif;
+}
+
+.hidden {
+    display: none;
+}
+
+#app {
+    min-height: 100vh;
+}
+
+main {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    padding: var(--page-padding);
+}
+
+section:not(:last-child) {
+    margin-bottom: var(--section-gap);
+}
+
+.section-header {
+    margin-bottom: 24px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}
+
+.filter-row {
+    margin-bottom: 28px;
+}
+
+.tabs {
+    margin-bottom: 20px;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns:
+    repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+}

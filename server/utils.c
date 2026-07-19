@@ -13,7 +13,11 @@ const char *get_mime(const char *path) {
     if (!strcmp(ext, ".css"))  return "text/css";
     if (!strcmp(ext, ".js"))   return "application/javascript";
     if (!strcmp(ext, ".png"))  return "image/png";
+    if (!strcmp(ext, ".json"))  return "application/json";
     if (!strcmp(ext, ".jpg") || !strcmp(ext, ".jpeg")) return "image/jpeg";
+    if (!strcmp(ext, ".png")) return "image/png";
+    if (!strcmp(ext, ".ico")) return "image/x-icon";
+    if (!strcmp(ext, ".svg")) return "image/svg+xml";
     return "application/octet-stream";
 }
 

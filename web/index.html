@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Shrimpternet</title>
+		<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+		<link rel="manifest" href="assets/site.webmanifest">
+        <link href="https://iosevka-webfonts.github.io/iosevka/Iosevka.css" rel="stylesheet" />
+		<link rel="stylesheet" href="stylesheets/index.css">
+		<link rel="stylesheet" href="stylesheets/components.css">
+		<script src="https://cdn.jsdelivr.net/npm/motion@latest/dist/motion.js"></script>
+		<script type="module" src="js/main.js"></script>
+	</head>
+	<body>
+		<div id="splash">
+			<div id="terminal">
+				<div class="terminal-line">
+					<span class="terminal-prompt">&gt;</span>
+					<span id="terminal-text"></span>
+					<span id="terminal-cursor"></span>
+				</div>
+				<div id="splash-title">[ SHRIMPTERNET ]</div>
+			</div>
+		</div>
+
+		<main id="main">
+			<section id="blogs-section">
+				<header class="section-header">
+					<h2>[ BLOGS ]</h2>
+				</header>
+				<div id="blog-filters" class="filter-row"></div>
+				<div id="blog-grid" class="card-grid"></div>
+			</section>
+			<section id="videos-section">
+				<header class="section-header">
+					<h2>[ VIDEOS ]</h2>
+				</header>
+				<nav id="video-tabs" class="tabs"></nav>
+				<div id="video-filters" class="filter-row"></div>
+				<div id="video-grid" class="card-grid"></div>
+			</section>
+		</main>
+
+		<template id="card-template">
+			<a class="card" target="_self" rel="noopener">
+				<img class="card-image" loading="lazy" draggable="false">
+				<div class="card-body">
+					<h3 class="card-title"></h3>
+					<div class="card-subtitle"></div>
+					<div class="card-updated"></div>
+				</div>
+			</a>
+		</template>
+
+		<template id="chip-template">
+			<button class="chip" type="button"></button>
+		</template>
+
+		<template id="tab-template">
+			<button class="tab" type="button"></button>
+		</template>
+
+		<template id="empty-template">
+			<div class="empty"></div>
+		</template>
+	</body>
+</html>

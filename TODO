@@ -1,0 +1,5 @@
+- Add background crunching for scraper
+- Add live reload/update notification for websites
+- Add capture images for scraped websites
+- Add documentation for languages, frameworks, etc dynamically based on recent usage
+- Make a video player that disallows going fast
