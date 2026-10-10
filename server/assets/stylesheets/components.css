@@ -67,6 +67,9 @@
 .tab {
     cursor: pointer;
     color: var(--muted);
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
     transition: 180ms;
     letter-spacing: 0.08em;
 }

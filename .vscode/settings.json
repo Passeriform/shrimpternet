@@ -1,14 +1,20 @@
 {
     "cSpell.words": [
         "deadnix",
+        "dontBuild",
+        "esac",
+        "fromjson",
         "httrack",
         "matroska",
         "nixd",
         "nixos",
         "nixpkgs",
         "pkgs",
+        "rawfile",
         "referer",
         "shrimpternet",
-        "statix"
+        "statix",
+        "shellcheck",
+        "stdenv"
     ]
 }

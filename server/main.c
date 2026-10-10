@@ -42,7 +42,7 @@ static void serve_file(int client_fd, const char *base_dir, char *path) {
     close(file_fd);
 }
 
-static void handle_client(int client_fd, const char *base_dir, const char *web_dir) {
+static void handle_client(int client_fd, const char *base_dir, const char *assets_dir) {
     char buf[2048] = {0};
     char method[16], path[1024];
 
@@ -63,7 +63,7 @@ static void handle_client(int client_fd, const char *base_dir, const char *web_d
 
         serve_file(client_fd, base_dir, path);
     } else {
-        serve_file(client_fd, web_dir, path);
+        serve_file(client_fd, assets_dir, path);
     }
 }
 
@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
     char base_dir[PATH_MAX];
     if (!realpath(argv[1], base_dir)) DIE("Target routing directory invalid");
 
-    char web_dir[PATH_MAX];
-    if (!realpath(argv[2], web_dir)) DIE("Landing web assets directory invalid");
+    char assets_dir[PATH_MAX];
+    if (!realpath(argv[2], assets_dir)) DIE("Landing web assets directory invalid");
 
     int port = (argc >= 4) ? atoi(argv[3]) : 8080;
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
         if (fork() == 0) {
             close(server_fd);
-            handle_client(client_fd, base_dir, web_dir);
+            handle_client(client_fd, base_dir, assets_dir);
             close(client_fd);
             return EXIT_SUCCESS;
         }
