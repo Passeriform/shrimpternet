@@ -21,7 +21,6 @@ in
       # Server
       $CC server/*.c -O2 -o serve
       cp serve $out/bin/
-      ls server
       cp -r server/assets $out/share/
 
       # Scripts
