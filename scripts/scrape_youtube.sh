@@ -45,11 +45,8 @@ trap 'exit 130' INT TERM
 [[ "$QUALITY" =~ ^([0-9]+)p?$ ]] || die "-q must look like 720p (got '$QUALITY')."
 HEIGHT="${BASH_REMATCH[1]}"
 
-if $HEIGHT; then
-  FORMAT="bv*[height<=${HEIGHT}]+ba/b[height<=${HEIGHT}]"
-else
-  FORMAT="bv*+ba/b"
-fi
+FORMAT="bv*+ba/b"
+(( HEIGHT > 0 )) && FORMAT="bv*[height<=${HEIGHT}]+ba/b[height<=${HEIGHT}]"
 
 yt-dlp \
   --yes-playlist \
