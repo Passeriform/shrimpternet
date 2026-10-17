@@ -32,9 +32,10 @@ if [ -z "$TARGET_URL" ]; then
   usage
 fi
 
-wget \
+wget2 \
   `# Mode` --mirror \
   `# Behavior` --page-requisites --adjust-extension --convert-links --no-parent \
+  `# Performance` --http2 --max-threads=5 --compression=gzip,br,zstd \
   `# Identity` --user-agent="Shrimpternet/visitor" \
   `# Kindness` --wait=2 --random-wait --limit-rate=200k \
   `# Local` --directory-prefix="$OUTPUT_DIR" \
