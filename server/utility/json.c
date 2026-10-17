@@ -4,7 +4,8 @@
 
 #include "json.h"
 
-#define DIE(msg) do { perror("[FATAL] " msg); exit(EXIT_FAILURE); } while(0)
+#define DIE(msg) do { fputs("[FATAL] " msg "\n", stderr); exit(EXIT_FAILURE); } while(0)
+#define DIE_SYS(msg) do { perror("[FATAL] " msg); exit(EXIT_FAILURE); } while (0)
 
 #define LIT_OFFSET(lit) (sizeof(#lit) - 2)
 _Static_assert(LIT_OFFSET(null)  == 3, "LIT_OFFSET(null) must be 3");
@@ -12,6 +13,18 @@ _Static_assert(LIT_OFFSET(true)  == 3, "LIT_OFFSET(true) must be 3");
 _Static_assert(LIT_OFFSET(false) == 4, "LIT_OFFSET(false) must be 4");
 
 #define JSON_INDENT 2
+
+static void * __malloc_or_die(const size_t size) {
+    void * const ptr = malloc(size);
+    if (ptr == NULL) DIE_SYS("Ran out of memory while allocating.");
+    return ptr;
+}
+
+static void * __realloc_or_die(void * const ptr, const size_t size) {
+    void * const grown = realloc(ptr, size);
+    if (grown == NULL) DIE_SYS("Ran out of memory while reallocating.");
+    return grown;
+}
 
 static inline bool json_is_whitespace(const char ch) {
     return ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t';
@@ -39,9 +52,7 @@ static const char * json_parse_string(const char * const start, char ** const ta
 
     const size_t strLength = currentPtr - start;
 
-    char * const str = malloc(strLength + 1);
-    if (str == NULL) DIE("Failed to allocate JSON string.");
-
+    char * const str = __malloc_or_die(strLength + 1);
     memcpy(str, start, strLength);
     str[strLength] = '\0';
 
@@ -50,11 +61,9 @@ static const char * json_parse_string(const char * const start, char ** const ta
 }
 
 static const char * json_parse_array(const char * const start, json_array ** const target) {
-    json_array * const arr = calloc(1, sizeof(*arr));
-    if (arr == NULL) DIE("Failed to allocate JSON array.");
-
-    arr->values = malloc(sizeof(*arr->values));
-    if (arr->values == NULL) DIE("Failed to allocate JSON array storage.");
+    json_array * const arr = __malloc_or_die(sizeof(*arr));
+    arr->values = __malloc_or_die(sizeof(*arr->values));
+    arr->count = 0;
 
     for (const char * currentPtr = start; *currentPtr != '\0'; ++currentPtr) {
         // Ignore whitespaces
@@ -67,7 +76,7 @@ static const char * json_parse_array(const char * const start, json_array ** con
         }
 
         if (*currentPtr == ',') {
-            arr->values = realloc(arr->values, (arr->count + 1) * sizeof(*arr->values));
+            arr->values = __realloc_or_die(arr->values, (arr->count + 1) * sizeof(*arr->values));
             continue;
         }
 
@@ -82,13 +91,10 @@ static const char * json_parse_array(const char * const start, json_array ** con
 static const char * json_parse_object(const char * const start, json_object ** const target) {
     bool isKey = true;
 
-    json_object * const json = calloc(1, sizeof(*json));
-    if (json == NULL) DIE("Failed to allocate JSON object.");
-
-    json->keys = malloc(sizeof(*json->keys));
-    if (json->keys == NULL) DIE("Failed to allocate JSON object keys storage.");
-    json->values = malloc(sizeof(*json->values));
-    if (json->values == NULL) DIE("Failed to allocate JSON object values storage.");
+    json_object * const json = __malloc_or_die(sizeof(*json));
+    json->keys = __malloc_or_die(sizeof(*json->keys));
+    json->values = __malloc_or_die(sizeof(*json->values));
+    json->count = 0;
 
     for (const char * currentPtr = start; *currentPtr != '\0'; ++currentPtr) {
         // Ignore whitespaces
@@ -101,8 +107,8 @@ static const char * json_parse_object(const char * const start, json_object ** c
         }
 
         if (*currentPtr == ',') {
-            json->keys = realloc(json->keys, (json->count + 1) * sizeof(*json->keys));
-            json->values = realloc(json->values, (json->count + 1) * sizeof(*json->values));
+            json->keys = __realloc_or_die(json->keys, (json->count + 1) * sizeof(*json->keys));
+            json->values = __realloc_or_die(json->values, (json->count + 1) * sizeof(*json->values));
             isKey = true;
             continue;
         }
