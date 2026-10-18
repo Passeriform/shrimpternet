@@ -1,10 +1,10 @@
-#include "server.h"
-
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+
+#include <utility/server.h>
 
 const char *get_mime(const char *path) {
     const char *ext = strrchr(path, '.');

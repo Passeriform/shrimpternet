@@ -13,7 +13,11 @@ pkgs.stdenv.mkDerivation {
     mkdir -p $out/share/assets
 
     # Server
-    $CC server/*.c -O2 -o serve
+    $CC -O2 -Wall -Wextra \
+      -Iserver \
+      server/utility/*.c \
+      server/main.c \
+      -o serve
     cp serve $out/bin/
     cp -r server/assets $out/share/
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "json.h"
+#include <utility/json.h>
 
 #define DIE(msg) do { fputs("[FATAL] " msg "\n", stderr); exit(EXIT_FAILURE); } while(0)
 #define DIE_SYS(msg) do { perror("[FATAL] " msg); exit(EXIT_FAILURE); } while (0)

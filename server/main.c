@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "utility/server.h"
+#include <utility/server.h>
 
 #define DIE(msg) do { perror("[FATAL] " msg); exit(EXIT_FAILURE); } while(0)
 
