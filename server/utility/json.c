@@ -169,7 +169,7 @@ const char * json_parse_value(const char * start, json_value * const target) {
 void json_print(const json_value * const root, const int depth) {
     switch (root->type) {
     case JSON_NULL:
-        fputs("null");
+        fputs("null", stdout);
         return;
     case JSON_STRING:
         printf("\"%s\"", root->value.string);
@@ -178,7 +178,7 @@ void json_print(const json_value * const root, const int depth) {
         printf("%g", root->value.number);
         return;
     case JSON_BOOL:
-        fputs(root->value.boolean ? "true" : "false");
+        fputs(root->value.boolean ? "true" : "false", stdout);
         return;
     case JSON_OBJECT: {
         const json_object *obj = root->value.object;
@@ -186,7 +186,7 @@ void json_print(const json_value * const root, const int depth) {
         for (int i = 0; i < obj->count; ++i) {
             printf("%*s\"%s\": ", (depth + 1) * JSON_INDENT, "", obj->keys[i]);
             json_print(&obj->values[i], depth + 1);
-            fputs("%s\n", i + 1 < obj->count ? "," : "");
+            fputs(i + 1 < obj->count ? "," : "", stdout);
         }
         printf("%*s}", depth * 2, "");
         return;
@@ -197,7 +197,7 @@ void json_print(const json_value * const root, const int depth) {
         for (int i = 0; i < arr->count; ++i) {
             printf("%*s", (depth + 1) * 2, "");
             json_print(&arr->values[i], depth + 1);
-            fputs("%s\n", i + 1 < arr->count ? "," : "");
+            fputs(i + 1 < arr->count ? "," : "", stdout);
         }
         printf("%*s]", depth * 2, "");
         return;
