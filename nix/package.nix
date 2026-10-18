@@ -8,6 +8,18 @@ pkgs.stdenv.mkDerivation {
   dontBuild = true;
   strictDeps = true;
 
+  doCheck = pkgs.stdenv.buildPlatform.canExecute pkgs.stdenv.hostPlatform;
+
+  checkPhase = ''
+    $CC -g -Wall -Wextra -fsanitize=address,undefined \
+      -Iserver \
+      server/utility/*.c \
+      server/tests/test.c \
+      -o run_tests
+
+    ./run_tests
+  '';
+
   installPhase = ''
     mkdir -p $out/bin
     mkdir -p $out/share/assets
