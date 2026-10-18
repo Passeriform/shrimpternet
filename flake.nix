@@ -33,10 +33,10 @@
       pkgs = import nixpkgs {inherit system;};
       profile = "c";
       blogs = [
-        "https://alexwlchan.net/"
-        "http://www.catb.org/esr"
-        "https://www.passeriform.com/"
-        "https://kyrie25.dev/"
+        "alexwlchan.net"
+        "www.passeriform.com"
+        "kyrie25.dev"
+        "heitorpb.github.io"
       ];
       playlists = [
         "PLekO4IUwUsw_Abt1W7smz1vaiaB8bZCMo"
@@ -62,15 +62,15 @@
           export VSCODE_PROFILE="${profile}";
 
           setup_shrimp() {
-            export SHRIMP_HOME=".home";
+            export SHRIMP_HOME="${DEBUG_HOME}";
 
-            mkdir -p ".home/.config/shrimpternet"
-            mkdir -p ".home/.cache/shrimpternet/blogs"
-            mkdir -p ".home/.cache/shrimpternet/youtube"
-            echo "{}" > ".home/.cache/shrimpternet/meta.json"
+            mkdir -p "${DEBUG_HOME}/.config/shrimpternet"
+            mkdir -p "${DEBUG_HOME}/.cache/shrimpternet/blogs"
+            mkdir -p "${DEBUG_HOME}/.cache/shrimpternet/youtube"
+            echo "{}" > "${DEBUG_HOME}/.cache/shrimpternet/meta.json"
 
-            echo "${builtins.concatStringsSep "\n" blogs}" > ".home/.config/shrimpternet/blogs"
-            echo "${builtins.concatStringsSep "\n" playlists}" > ".home/.config/shrimpternet/youtube"
+            echo "${builtins.concatStringsSep "\n" blogs}" > "${DEBUG_HOME}/.config/shrimpternet/blogs"
+            echo "${builtins.concatStringsSep "\n" playlists}" > "${DEBUG_HOME}/.config/shrimpternet/youtube"
           }
 
           setup_shrimp
