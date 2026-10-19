@@ -54,8 +54,7 @@ run() {
         exec 2>&1
     fi
 
-    SCRIPT_DIR=$(dirname $0)
-    serve "${BLOGS_CACHE_DIR}" "${SCRIPT_DIR}/../share/assets" 4000 &
+    serve "${BLOGS_CACHE_DIR}" 4000 &
     wait
 }
 
